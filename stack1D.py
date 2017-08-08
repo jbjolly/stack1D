@@ -82,11 +82,11 @@ def Stack(images, method='mean', stackSize=0, visu=0):
         thisImage=images[i]
         thisImageLines=thisImage.lines
         freqMidLine=np.zeros(len(thisImageLines))
-        freqMidLineIndex=np.zeros(len(thisImageLines))
+        freqMidLineIndex=np.zeros(len(thisImageLines))#.astype(int)
         for j in range(len(thisImageLines)):
             thisLine=thisImageLines[j]
-            freqMidLine[j]=thisLine.observedFToday
             freqMidLineIndex[j]=int((freqMidLine[j]-thisImage.fminIm)/thisImage.chanwidth)
+            freqMidLine[j]=thisLine.observedFToday
             toStack[i]+=thisImage.spectrum[freqMidLineIndex[j]-int(stackSize/2):freqMidLineIndex[j]+int(stackSize/2)+1]
     if method=='mean':
         return np.average(toStack,0)
@@ -100,7 +100,7 @@ def Stack(images, method='mean', stackSize=0, visu=0):
 
 c=1e5#in km
 numberOfImages=100
-dz=0
+dz=0.0001
 emittedFrequency=1420
 myFmin=100
 myFmax=300
@@ -117,7 +117,7 @@ freqMaxLim=myFmax-2*panWidth
 freqMinLim=myFmin+2*panWidth
 zRange_pan=[(emittedFrequency/freqMaxLim)-1,(emittedFrequency/freqMinLim)-1]
 
-''' ============== '''
+''' ======= I M A G E S    G E N E R A T I O N   ======= '''
 
 
 allImages=[]
@@ -141,6 +141,7 @@ for i in range(numberOfImages):
 
 
 ''' =========== S T A C K ============= '''
+
 stacked=Stack(allImages, stackSize=numberOfChansStack)
 
 
@@ -155,3 +156,30 @@ for i in range(numberOfImages):
 
 ax2.plot(stacked)
 fig.show()
+
+
+''' ======== B O O T S T R A P ========
+stackedBoot=([0 for i in range(numberOfImages+1) ])
+stackedBoot[0]=stacked
+#newImages=([ ([0 for i in range(numberOfImages-1) ]) for j in range(numberOfImages)])
+newImages=([0 for i in range(numberOfImages-1) ])
+#imageNotStacked=0
+for i in range(numberOfImages):
+    k=0
+    for j in range(numberOfImages):
+        if j!=i:
+
+            newImages[k]=allImages[j]
+            k+=1
+    stackedBoot[i+1]=Stack(newImages, stackSize=numberOfChansStack)
+
+fig1=plt.figure()
+ax=fig1.add_subplot(1,1,1)
+for i in range(numberOfImages+1):
+    if i==0:
+        ax.plot(stackedBoot[i],'ro-',linewidth=15)
+    else:
+        ax.plot(stackedBoot[i])
+fig1.show()
+
+'''
