@@ -50,7 +50,10 @@ class Line():
             self.amp=float(amp)
         self.z=float(z)
         self.fEm=float(fEm)
-        self.observedZ=np.random.normal(self.z, dz)
+        if dz!=0:
+            self.observedZ=np.random.normal(self.z, dz)
+        else:
+            self.observedZ=self.z
         self.fToday=self.fEm/(1+self.z)
         self.observedFToday=self.fEm/(1+self.observedZ)
 
@@ -97,7 +100,7 @@ def Stack(images, method='mean', stackSize=0, visu=0):
 
 c=1e5#in km
 numberOfImages=100
-dz=0.01
+dz=0
 emittedFrequency=1420
 myFmin=100
 myFmax=300
