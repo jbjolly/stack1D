@@ -116,19 +116,6 @@ zRange_pan=[(emittedFrequency/freqMaxLim)-1,(emittedFrequency/freqMinLim)-1]
 
 ''' ============== '''
 
-randomZ=np.random.uniform(zRange_pan[0],zRange_pan[1])
-linou=Line(   linewidth=myLinewidth,
-        amp=lineMeanAmp, z=randomZ,
-        fEm=emittedFrequency)
-
-
-imagou=Image( fminIm=myFmin,
-        fmaxIm=myFmax,
-        numberOfChannelsIm=numberOfChansIm,
-        numberOfLines=numberOfLinesPerImage,
-        spectrum=Spectrum(fullFrequencies, lines=[linou]),
-        lines=[linou])
-
 
 allImages=[]
 for i in range(numberOfImages):
