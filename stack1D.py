@@ -99,7 +99,7 @@ def Stack(images, method='mean', stackSize=0, visu=0):
 ''' ================ D E F I N I T I O N S ================== '''
 
 c=1e5#in km
-numberOfImages=9
+numberOfImages=10
 dz=0.0001
 emittedFrequency=1420
 myFmin=100
@@ -118,6 +118,7 @@ freqMinLim=myFmin+2*panWidth
 zRange_pan=[(emittedFrequency/freqMaxLim)-1,(emittedFrequency/freqMinLim)-1]
 myNoiseAmp=lineMeanAmp/2
 myNoise=True
+
 ''' ======= I M A G E S    G E N E R A T I O N   ======= '''
 
 
@@ -150,25 +151,10 @@ for i in range(numberOfImages):
 stacked=Stack(allImages, stackSize=numberOfChansStack)
 
 
-
-
-import matplotlib.pyplot as plt
-fig=plt.figure()
-ax1=fig.add_subplot(2,1,1)
-ax2=fig.add_subplot(2,1,2)
-for i in range(numberOfImages):
-    ax1.plot(allImages[i].spectrum)
-
-ax2.plot(stacked)
-fig.show()
-
-
 ''' ======== B O O T S T R A P ======== '''
-stackedBoot=([0 for i in range(numberOfImages+1) ])
-stackedBoot[0]=stacked
+stackedBoot=([0 for i in range(numberOfImages) ])
 
-stackedBoot1=([0 for i in range(numberOfImages+1) ])
-stackedBoot1[0]=stacked
+stackedBoot1=([0 for i in range(numberOfImages) ])
 
 #newImages=([ ([0 for i in range(numberOfImages-1) ]) for j in range(numberOfImages)])
 newImages=([0 for i in range(numberOfImages-1) ])
@@ -176,53 +162,44 @@ newImages1=([0 for i in range(numberOfImages+1) ])
 #imageNotStacked=0
 for i in range(numberOfImages):
     k=0
+    k1=0
     for j in range(numberOfImages):
         if j!=i:
 
             newImages[k]=allImages[j]
-            newImages1[k]=allImages[j]
+            newImages1[k1]=allImages[j]
             k+=1
+            k1+=1
         else:
-            newImages1[-1]=allImages[j]
-            newImages1[-2]=allImages[j]
-    stackedBoot[i+1]=Stack(newImages, stackSize=numberOfChansStack)
-    stackedBoot1[i+1]=Stack(newImages1, stackSize=numberOfChansStack)
-
-fig1=plt.figure()
-ax=fig1.add_subplot(1,1,1)
-for i in range(numberOfImages+1):
-    if i==0:
-        ax.plot(stackedBoot[i],'ro-',linewidth=15)
-    else:
-        ax.plot(stackedBoot[i])
-fig1.show()
+            newImages1[k1]=allImages[j]
+            newImages1[k1+1]=allImages[j]
+            k1+=2
+    stackedBoot[i]=Stack(newImages, stackSize=numberOfChansStack)
+    stackedBoot1[i]=Stack(newImages1, stackSize=numberOfChansStack)
 
 
-leVecteurDeLaDiff=([stackedBoot[i]-stackedBoot[0] for i in range(1,len(stackedBoot))])
-leVecteurDeLaDiff1=([stackedBoot1[i]-stackedBoot1[0] for i in range(1,len(stackedBoot))])
+leVecteurDeLaDiff=([stackedBoot[i]-stacked for i in range(len(stackedBoot))])
+leVecteurDeLaDiff1=([stackedBoot1[i]-stacked for i in range(len(stackedBoot))])
 
+import matplotlib.pyplot as plt
 import math
-fig2=plt.figure()
-ax=([fig2.add_subplot(3,math.ceil(numberOfImages/3),i) for i in range(len(leVecteurDeLaDiff)-1) ])
 
-for i in range(len(leVecteurDeLaDiff)):
-    if i!=0:
-        ax[i-1].plot(leVecteurDeLaDiff[i])
-fig2.show()
-
-print np.mean(leVecteurDeLaDiff,1)
-print ''
-print np.mean(leVecteurDeLaDiff,0)
-
-
-
-fig3=plt.figure()
-ax=([fig3.add_subplot(3,math.ceil(numberOfImages/3),i) for i in range(len(leVecteurDeLaDiff1)-1) ])
-
-for i in range(len(leVecteurDeLaDiff1)):
-    if i!=0:
-        ax[i-1].plot(leVecteurDeLaDiff1[i])
+#fig3=plt.figure()
+#ax=([fig3.add_subplot(3,math.ceil(numberOfImages/3),i+1) for i in range(len(leVecteurDeLaDiff1)) ])
+toplot=([ [np.mean(leVecteurDeLaDiff[i][9:12]), np.mean(leVecteurDeLaDiff1[i][9:12])] for i in range(len(leVecteurDeLaDiff)) ])
+'''
+for i in range(len(toplot)):
+        ax[i].plot(toplot[i])
+        ax[i].set_title(str(i))
+plt.savefig('letest.pdf')
 fig3.show()
+'''
+for i in range(len(toplot)):
+    if i==0:
+        plt.plot(toplot[i], linewidth=10)
+    else:
+        plt.plot(toplot[i])
+plt.show()
 print '+1'
 print np.mean(leVecteurDeLaDiff1,1)
 print ''
